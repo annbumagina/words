@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->select_directory->setIcon(style.standardIcon(QCommonStyle::SP_DialogOpenButton));
     ui->lineEdit->setReadOnly(true);
     connect(t, SIGNAL(send(std::vector<QString>)), this, SLOT(get_files(std::vector<QString>)));
-    QThreadPool::globalInstance()->setMaxThreadCount(40);
 }
 
 MainWindow::~MainWindow()

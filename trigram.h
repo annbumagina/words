@@ -13,7 +13,7 @@ public:
     char *bf;
     int len;
     std::unordered_set<unsigned> tris;
-    //int id;
+    int id;
     QString file;
     Trigram();
 };

@@ -19,17 +19,14 @@ signals:
     void send(std::vector<QString>);
 
 public slots:
-    std::vector<QString> get_files(QString);
+    void index_files(QString);
     void run(QString);
-    void index_files();
     void index_finished();
     void serch(QString);
 
 private:
-    QFutureWatcher< std::vector<QString> >  watcher;
-    QFutureWatcher<void> index_watcher;
-    QFuture< std::vector<QString> > future;
-    QFuture<void> index_future;
+    QFutureWatcher<void> watcher;
+    QFuture<void> future;
     QList<Index> files;
     QElapsedTimer *timer;
 

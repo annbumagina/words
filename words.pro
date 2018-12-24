@@ -30,14 +30,12 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     task.cpp \
-    index.cpp \
-    trigram.cpp
+    index.cpp
 
 HEADERS += \
         mainwindow.h \
     task.h \
-    index.h \
-    trigram.h
+    index.h
 
 FORMS += \
         mainwindow.ui

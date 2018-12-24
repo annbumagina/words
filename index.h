@@ -21,8 +21,6 @@ public:
     void index_file();
 
 //private:
-    Trigram tris[TH];
-    QFuture<void> future[TH];
 };
 
 #endif // INDEX_H
