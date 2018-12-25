@@ -5,20 +5,21 @@
 #include <QObject>
 #include <set>
 #include <QFuture>
-
-const int TH = 1;
+#include <atomic>
 
 class Index
 {
 public:
-    Index(const QString &s);
+    Index(QString const&);
     QString file;
-    std::unordered_set<unsigned> trigrams;
+    std::vector<unsigned> trigrams;
+    bool canceled;
 
 //signals:
 
 //public slots:
     void index_file();
+    long long search(std::string, std::vector<unsigned> const&);
 
 //private:
 };

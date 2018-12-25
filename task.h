@@ -8,27 +8,23 @@
 #include <QFutureWatcher>
 #include <QList>
 #include <QElapsedTimer>
+#include <atomic>
 
 class Task : public QObject
 {
     Q_OBJECT
 public:
     Task();
-
-signals:
-    void send(std::vector<QString>);
+    std::atomic<bool> canceled;
 
 public slots:
+    std::vector< std::pair<QString, long long> > search(QString);
     void index_files(QString);
-    void run(QString);
-    void index_finished();
-    void serch(QString);
+    void cancel();
 
-private:
-    QFutureWatcher<void> watcher;
-    QFuture<void> future;
+//private:
+public:
     QList<Index> files;
-    QElapsedTimer *timer;
 
 };
 
