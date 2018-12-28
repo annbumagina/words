@@ -10,6 +10,7 @@
 
 const int TH = 6;
 const int N = 1024 * 32;
+const int MAX_TRIS_COUNT = 1e5;
 
 class Index
 {

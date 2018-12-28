@@ -29,6 +29,7 @@ void Index::index_file() {
     } else {
         index_large_file();
     }
+    qDebug() << QString::number(trigrams.size());
 }
 
 void Index::index_large_file() {
@@ -49,6 +50,12 @@ void Index::index_large_file() {
         }
         for (int i = 0; i < TH; i++) {
             future[i].waitForFinished();
+        }
+        for (int i = 0; i < TH; i++) {
+            if (t[i].tris.size() > MAX_TRIS_COUNT) {
+                clear();
+                return;
+            }
         }
     }
     long long sum = 0;
@@ -97,15 +104,17 @@ void Index::index_small_file() {
 std::vector<long long> Index::search(int WS, std::regex const& r, std::vector<unsigned> const& tr) {
     //qDebug() << QString(__func__) << " from work thread: " << QThread::currentThreadId();
     //qDebug() << QString::fromStdString(word);
-    bool good = true;
-    for (auto x: tr) {
-        if (std::lower_bound(trigrams.begin(), trigrams.end(), x) == trigrams.end()) {
-            good = false;
-            break;
+    if (tr.size() > 0 && trigrams.size() > 0) {
+        bool good = true;
+        for (auto x: tr) {
+            if (std::lower_bound(trigrams.begin(), trigrams.end(), x) == trigrams.end()) {
+                good = false;
+                break;
+            }
         }
+        if (!good)
+            return {};
     }
-    if (!good)
-        return {};
 
     std::vector<long long> pos;
     if (QFile(file).size() <= N) {
