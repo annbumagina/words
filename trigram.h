@@ -5,16 +5,15 @@
 #include <QString>
 #include <vector>
 #include <unordered_set>
+#include <regex>
 
 class Trigram
 {
 public:
-    void text_to_tris();
-    char *bf;
-    int len;
+    void text_to_tris(char *, int);
+    void find_word(char *, int, std::regex const&, int, int);
     std::unordered_set<unsigned> tris;
-    int id;
-    QString file;
+    std::vector<long long> pos;
     Trigram();
 };
 

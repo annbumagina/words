@@ -3,22 +3,25 @@
 #include <QThread>
 #include <QString>
 #include <unordered_set>
+#include <regex>
 
 Trigram::Trigram()
 {}
 
-void Trigram::text_to_tris() {
-    //qDebug() << QString(__func__) << " " << file << " " << QString::number(id) <<" from work thread: " << QThread::currentThreadId();
+void Trigram::text_to_tris(char *bf, int len) {
+    //qDebug() << QString(__func__) <<" from work thread: " << QThread::currentThreadId();
     unsigned mask = 0x00FFFFFF;
-    unsigned x = (unsigned(bf[0]) << 16) | (unsigned(bf[1]) << 8) | unsigned(bf[2]);
-    tris.insert(x);
-    //qDebug() << QString(__func__) << " " << file << " " << QString::number(mask);
-    for (int i = 1; i < len - 2; i++) {
-        //unsigned x = (unsigned(bf[i]) << 16) | (unsigned(bf[i + 1]) << 8) | unsigned(bf[i + 2]);
-        x = (((x << 8) & mask) | bf[i + 2]);
+    unsigned x = ((unsigned(bf[0]) << 8) | unsigned(bf[1]));
+    for (int i = 2; i < len; i++) {
+        x = (((x << 8) & mask) | bf[i]);
         tris.insert(x);
-        //tris.insert(x);
-
     }
-    //qDebug() << QString(__func__) << " " << file << " " << QString::number(tris.size());
+}
+
+void Trigram::find_word(char *bf, int len, std::regex const& r, int WS, int SHIFT) {
+    auto words_begin = std::regex_iterator<char *>(bf, bf + WS - 1 + len, r);
+    auto words_end = std::regex_iterator<char *>();
+    for (auto i = words_begin; i != words_end; ++i) {
+       pos.push_back((*i).position(0) + SHIFT);
+    }
 }

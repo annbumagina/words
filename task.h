@@ -1,6 +1,8 @@
 #ifndef TASK_H
 #define TASK_H
 
+class Task;
+
 #include "index.h"
 
 #include <QObject>
@@ -18,7 +20,7 @@ public:
     std::atomic<bool> canceled;
 
 public slots:
-    std::vector< std::pair<QString, long long> > search(QString);
+    std::vector< std::pair<QString, std::vector<long long> > > search(QString);
     void index_files(QString);
     void cancel();
 

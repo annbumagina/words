@@ -30,12 +30,18 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     task.cpp \
-    index.cpp
+    index.cpp \
+    trigram.cpp \
+    viewer.cpp \
+    magicnumber.cpp
 
 HEADERS += \
         mainwindow.h \
     task.h \
-    index.h
+    index.h \
+    trigram.h \
+    viewer.h \
+    magicnumber.h
 
 FORMS += \
         mainwindow.ui
