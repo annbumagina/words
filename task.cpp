@@ -32,8 +32,12 @@ void Task::index_files(QString dir) {
         QString file_path = it.next();
         std::ifstream in(file_path.toStdString().c_str());
         in.read(bf, 12);
-        if (MagicNumber::check_type(bf, in.gcount()))
+        if (MagicNumber::check_type(bf, in.gcount())) {
             files.append({this, file_path});
+            //qDebug() << file_path << " good";
+        } else {
+            qDebug() << file_path << " bad";
+        }
     }
     for (auto& f: files) {
         if (canceled) { canceled = false; return; }
