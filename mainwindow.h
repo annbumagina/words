@@ -27,6 +27,8 @@ private slots:
     void on_pushButton_clicked();
     void cancel();
     void view_file(int, int);
+    void on_prev_clicked();
+    void on_next_clicked();
 
 private:
     Ui::MainWindow *ui;

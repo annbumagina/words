@@ -11,7 +11,7 @@ Trigram::Trigram()
 void Trigram::text_to_tris(char *bf, int len) {
     //qDebug() << QString(__func__) <<" from work thread: " << QThread::currentThreadId();
     unsigned mask = 0x00FFFFFF;
-    unsigned x = ((unsigned(bf[0]) << 8) | unsigned(bf[1]));
+    unsigned x = ((unsigned(uchar(bf[0])) << 8) | unsigned(uchar(bf[1])));
     for (int i = 2; i < len; i++) {
         x = (((x << 8) & mask) | bf[i]);
         tris.insert(x);

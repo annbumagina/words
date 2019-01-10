@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QCommonStyle style;
     ui->select_directory->setIcon(style.standardIcon(QCommonStyle::SP_DialogOpenButton));
     ui->lineEdit->setReadOnly(true);
+    ui->position->setReadOnly(true);
 
     ui->tableWidget->setColumnCount(2);
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
@@ -28,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget->setShowGrid(false);
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->widget_5->hide();
 
     connect(&watcher1, SIGNAL(finished()), this, SLOT(index_finished()));
     connect(&watcher2, SIGNAL(finished()), this, SLOT(search_finished()));
@@ -74,6 +76,7 @@ void MainWindow::on_search_clicked()
     ui->index_directory->setEnabled(false);
     ui->search->setEnabled(false);
     timer->restart();
+    ui->viewer->word = ui->word->text().toStdString();
     future2 = QtConcurrent::run(t, &Task::search, ui->word->text());
     watcher2.setFuture(future2);
 }
@@ -108,4 +111,21 @@ void MainWindow::cancel() {
 void MainWindow::view_file(int r, int) {
     qDebug() << QString(__func__) << " " << QString::number(r);
     ui->viewer->display(r);
+    ui->widget_5->show();
+    ui->position->setText(QString::number(ui->viewer->pos + 1) + " / "
+                          + QString::number(ui->viewer->m[ui->viewer->id].second.size()));
+}
+
+void MainWindow::on_prev_clicked()
+{
+    ui->viewer->prev();
+    ui->position->setText(QString::number(ui->viewer->pos + 1) + " / "
+                                             + QString::number(ui->viewer->m[ui->viewer->id].second.size()));
+}
+
+void MainWindow::on_next_clicked()
+{
+    ui->viewer->next();
+    ui->position->setText(QString::number(ui->viewer->pos + 1) + " / "
+                          + QString::number(ui->viewer->m[ui->viewer->id].second.size()));
 }

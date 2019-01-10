@@ -32,14 +32,14 @@ void Task::index_files(QString dir) {
         QString file_path = it.next();
         std::ifstream in(file_path.toStdString().c_str());
         in.read(bf, 12);
+        in.close();
         if (MagicNumber::check_type(bf, in.gcount())) {
+            if (canceled) { canceled = false; return; }
             files.append({this, file_path});
-            //qDebug() << file_path << " good";
+            if (!files.back().index_file()) {
+                files.pop_back();
+            }
         }
-    }
-    for (auto& f: files) {
-        if (canceled) { canceled = false; return; }
-        f.index_file();
     }
     canceled = false;
 }
@@ -51,9 +51,9 @@ std::vector< std::pair<QString, std::vector<long long> > > Task::search(QString 
     std::string word = wordQ.toStdString();
     if (word.size() > 2) {
         tr.reserve(word.size() - 2);
-        unsigned x = (unsigned(word[0]) << 8) | unsigned(word[1]);
+        unsigned x = ((unsigned(uchar(word[0])) << 8) | unsigned(uchar(word[1])));
         for (size_t i = 2; i < word.size(); i++) {
-            x = (((x << 8) & mask) | word[i]);
+            x = (((x << 8) & mask) | (unsigned(uchar(word[i]))));
             tr.push_back(x);
             //qDebug() << QString::number(x);
         }

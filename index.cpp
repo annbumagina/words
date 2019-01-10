@@ -23,23 +23,23 @@ void Index::clear() {
     }
 }
 
-void Index::index_file() {
+bool Index::index_file() {
     if (QFile(file).size() <= N) {
-        index_small_file();
+        return index_small_file();
     } else {
-        index_large_file();
+        return index_large_file();
     }
-    qDebug() << QString::number(trigrams.size());
+    //qDebug() << file << ' ' << QString::number(trigrams.size());
 }
 
-void Index::index_large_file() {
+bool Index::index_large_file() {
     //qDebug() << QString(__func__) << " from work thread: " << QThread::currentThreadId();
     std::ifstream in(file.toStdString().c_str());
     char bf[TH][N + 2];
     in.read(bf[0], 2);
     char a = bf[0][0], b = bf[0][1];
     while (!in.eof()) {
-        if (parent->canceled) { clear(); return; }
+        if (parent->canceled) { clear(); return 0; }
         for (int i = 0; i < TH && !in.eof(); i++) {
             bf[i][0] = a;
             bf[i][1] = b;
@@ -54,7 +54,7 @@ void Index::index_large_file() {
         for (int i = 0; i < TH; i++) {
             if (t[i].tris.size() > MAX_TRIS_COUNT) {
                 clear();
-                return;
+                return 0;
             }
         }
     }
@@ -72,33 +72,33 @@ void Index::index_large_file() {
     std::sort(trigrams.begin(), trigrams.end());
     trigrams.resize(std::unique(trigrams.begin(), trigrams.end()) - trigrams.begin());
     //qDebug() << QString::number(trigrams.size());
+    return 1;
 }
 
-void Index::index_small_file() {
+bool Index::index_small_file() {
     std::ifstream in(file.toStdString().c_str());
     char bf[N];
     unsigned mask = 0x00FFFFFF;
     std::unordered_set<unsigned> tr;
 
     in.read(bf, 2);
-    unsigned x = (unsigned(bf[0]) << 8) | unsigned(bf[1]);
+    unsigned x = (unsigned(uchar(bf[0])) << 8) | unsigned(uchar(bf[1]));
     while (!in.eof()) {
-        if (parent->canceled) { return; }
+        if (parent->canceled) { return 0; }
         in.read(bf, N);
         int len = in.gcount();
         for (int i = 0; i < len; i++) {
-            x = (((x << 8) & mask) | bf[i]);
+            x = (((x << 8) & mask) | uchar(bf[i]));
             tr.insert(x);
             //qDebug() << QString::number(x);
         }
     }
 
-    trigrams.reserve(tr.size());
-    for (auto i: tr) {
-        trigrams.push_back(i);
-    }
+    trigrams.resize(tr.size());
+    std::copy(tr.begin(), tr.end(), trigrams.begin());
     std::sort(trigrams.begin(), trigrams.end());
     //qDebug() << QString ::number(trigrams.size());
+    return 1;
 }
 
 std::vector<long long> Index::search(int WS, std::regex const& r, std::vector<unsigned> const& tr) {
