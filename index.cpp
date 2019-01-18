@@ -19,7 +19,7 @@ Index::Index(Task *p, const QString &s) : file(s), parent(p)
 void Index::clear() {
     for (int i = 0; i < TH; i++) {
         t[i].tris.clear();
-        t[i].pos.clear();
+        t[i].cnt = 0;
     }
 }
 
@@ -101,7 +101,7 @@ bool Index::index_small_file() {
     return 1;
 }
 
-std::vector<long long> Index::search(int WS, std::regex const& r, std::vector<unsigned> const& tr) {
+long long Index::search(int WS, std::regex const& r, std::vector<unsigned> const& tr) {
     //qDebug() << QString(__func__) << " from work thread: " << QThread::currentThreadId();
     //qDebug() << QString::fromStdString(word);
     if (tr.size() > 0 && trigrams.size() > 0) {
@@ -116,71 +116,60 @@ std::vector<long long> Index::search(int WS, std::regex const& r, std::vector<un
             return {};
     }
 
-    std::vector<long long> pos;
     if (QFile(file).size() <= N) {
-        search_small(WS, r, pos);
+        return search_small(WS, r);
     } else {
-        search_large(WS, r, pos);
+        return search_large(WS, r);
     }
-    //qDebug() << QString::number(cnt);
-    return pos;
 }
 
-void Index::search_small(int WS, std::regex const& r, std::vector<long long> &pos) {
+long long Index::search_small(int WS, std::regex const& r) {
     std::ifstream in(file.toStdString().c_str());
     char bf[N + WS - 1];
-    long long SHIFT = 0;
+    long long cnt = 0;
 
     in.read(bf, WS - 1);
     while (!in.eof()) {
-        if (parent->canceled) { return; }
+        if (parent->canceled) { return 0; }
         in.read(bf + WS - 1, N);
         int len = in.gcount();
 
         auto words_begin = std::regex_iterator<char *>(bf, bf + WS - 1 + len, r);
         auto words_end = std::regex_iterator<char *>();
-        for (auto i = words_begin; i != words_end; ++i) {
-           pos.push_back((*i).position(0) + SHIFT);
-        }
-        SHIFT += N;
+        cnt += std::distance(words_begin, words_end);
         std::copy(bf + len, bf + WS - 1 + len, bf);
     }
+    //qDebug() << QString::number(cnt);
+    return cnt;
 }
 
-void Index::search_large(int WS, std::regex const& r, std::vector<long long> &pos) {
+long long Index::search_large(int WS, std::regex const& r) {
     std::ifstream in(file.toStdString().c_str());
     char bf[TH][N + WS - 1];
     char wbf[WS - 1];
-    long long SHIFT = 0;
     int len;
 
     in.read(wbf, WS - 1);
     while (!in.eof()) {
-        if (parent->canceled) { clear(); return; }
+        if (parent->canceled) { clear(); return 0; }
         for (int i = 0; i < TH; i++) {
             std::copy(wbf, wbf + WS - 1, bf[i]);
             in.read(bf[i] + WS - 1, N);
             len = in.gcount();
             std::copy(bf[i] + len, bf[i] + len + WS - 1, wbf);
-            future[i] = QtConcurrent::run(&t[i], &Trigram::find_word, bf[i] + 0, len + WS - 1, r, WS, SHIFT);
-            SHIFT += N;
+            future[i] = QtConcurrent::run(&t[i], &Trigram::find_word, bf[i] + 0, len + WS - 1, r, WS);
         }
         for (int i = 0; i < TH; i++) {
             future[i].waitForFinished();
         }
     }
-    long long sum = 0;
-    long long pos_[TH];
+    long long cnt = 0;
     for (int i = 0; i < TH; i++) {
-        pos_[i] = sum;
-        sum += t[i].pos.size();
+        cnt += t[i].cnt;
     }
-    pos.resize(sum);
-    for (int i = 0; i < TH; i++) {
-        std::copy(t[i].pos.begin(), t[i].pos.end(), pos.begin() + pos_[i]);
-    }
+    //qDebug() << QString::number(cnt);
     clear();
-    //qDebug() << QString::number(count);
+    return cnt;
 }
 
 

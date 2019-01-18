@@ -5,6 +5,7 @@
 #include "viewer.h"
 
 #include <QMainWindow>
+#include <QProgressBar>
 
 namespace Ui {
 class MainWindow;
@@ -34,10 +35,12 @@ private:
     Ui::MainWindow *ui;
     Task *t;
     QElapsedTimer *timer;
+    std::vector< std::pair<QString, long long> > pos;
+    std::string word;
     QFutureWatcher<void> watcher1;
-    QFutureWatcher< std::vector< std::pair<QString, std::vector<long long> > > > watcher2;
+    QFutureWatcher< std::pair< std::string, std::vector< std::pair<QString, long long> > > > watcher2;
     QFuture<void> future1;
-    QFuture< std::vector< std::pair<QString, std::vector<long long> > > > future2;
+    QFuture< std::pair< std::string, std::vector< std::pair<QString, long long> > > > future2;
 };
 
 #endif // MAINWINDOW_H

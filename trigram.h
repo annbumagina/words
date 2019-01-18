@@ -11,9 +11,9 @@ class Trigram
 {
 public:
     void text_to_tris(char *, int);
-    void find_word(char *, int, std::regex const&, int, int);
+    void find_word(char *, int, std::regex const&, int);
     std::unordered_set<unsigned> tris;
-    std::vector<long long> pos;
+    long long cnt = 0;
     Trigram();
 };
 

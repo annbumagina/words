@@ -24,7 +24,17 @@ void Task::cancel() {
 
 void Task::index_files(QString dir) {
     qDebug() << QString(__func__) << " from work thread: " << QThread::currentThreadId();
+    QDirIterator it2(dir, QDir::Files | QDir::NoDotAndDotDot | QDir::Readable, QDirIterator::Subdirectories);
+    int files_cnt = 0;
+    while (it2.hasNext()) {
+        if (canceled) { canceled = false; return; }
+        it2.next();
+        files_cnt++;
+    }
+    emit setRange(0, std::max(1, files_cnt));
+
     QDirIterator it(dir, QDir::Files | QDir::NoDotAndDotDot | QDir::Readable, QDirIterator::Subdirectories);
+    int cnt = 0;
     files.clear();
     char bf[12];
     while (it.hasNext()) {
@@ -40,11 +50,15 @@ void Task::index_files(QString dir) {
                 files.pop_back();
             }
         }
+        cnt++;
+        if (cnt % 50 == 0)
+            emit setValue(cnt);
     }
+    emit setValue(cnt);
     canceled = false;
 }
 
-std::vector< std::pair<QString, std::vector<long long> > > Task::search(QString wordQ) {
+std::pair< std::string, std::vector< std::pair<QString, long long> > > Task::search(QString wordQ) {
     qDebug() << QString(__func__) << " from work thread: " << QThread::currentThreadId();
     unsigned mask = 0x00FFFFFF;
     std::vector<unsigned> tr;
@@ -61,17 +75,22 @@ std::vector< std::pair<QString, std::vector<long long> > > Task::search(QString 
     std::sort(tr.begin(), tr.end());
     tr.resize(std::unique(tr.begin(), tr.end()) - tr.begin());
 
-    std::vector< std::pair<QString, std::vector<long long> > > m;
+    std::vector< std::pair<QString, long long> > m;
     std::regex sp { R"([-[\]{}()*+?.,\^$|#\s\\])" };
     std::string sanitized = regex_replace(word, sp, R"(\$&)");
     std::regex r(sanitized);
+    emit setRange(0, std::max(1, files.size()));
+    int cnt = 0;
     for (auto& f: files) {
-        if (canceled) { canceled = false; return m; }
-        std::vector<long long> pos = f.search(word.size(), r, tr);
-        if (pos.size() > 0) {
+        if (canceled) { canceled = false; return {word, m}; }
+        long long pos = f.search(word.size(), r, tr);
+        if (pos > 0) {
             m.push_back({f.file, pos});
         }
+        cnt++;
+        if (cnt % 50 == 0)
+            emit setValue(cnt);
     }
     canceled = false;
-    return m;
+    return {word, m};
 }

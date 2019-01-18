@@ -19,13 +19,13 @@ public:
     QString file;
 
     bool index_file();
-    std::vector<long long> search(int, std::regex const&, std::vector<unsigned> const&);
+    long long search(int, std::regex const&, std::vector<unsigned> const&);
 
 private:
     bool index_small_file();
     bool index_large_file();
-    void search_large(int, std::regex const&, std::vector<long long> &);
-    void search_small(int, std::regex const&, std::vector<long long> &);
+    long long search_large(int, std::regex const&);
+    long long search_small(int, std::regex const&);
     void clear();
 
     Task *parent;

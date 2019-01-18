@@ -20,9 +20,13 @@ public:
     std::atomic<bool> canceled;
 
 public slots:
-    std::vector< std::pair<QString, std::vector<long long> > > search(QString);
+    std::pair< std::string, std::vector< std::pair<QString, long long> > > search(QString);
     void index_files(QString);
     void cancel();
+
+signals:
+    void setRange(int, int);
+    void setValue(int);
 
 //private:
 public:
