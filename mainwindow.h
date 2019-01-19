@@ -31,6 +31,8 @@ private slots:
     void view_file(int, int);
     void on_prev_clicked();
     void on_next_clicked();
+    void add_dirs();
+    void reindex();
 
 private:
     Ui::MainWindow *ui;

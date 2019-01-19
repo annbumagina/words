@@ -8,6 +8,7 @@
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrentRun>
 #include <thread>
+#include <QDirIterator>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -36,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->tableWidget, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(view_file(int, int)));
     connect(t, SIGNAL(setRange(int, int)), ui->progressBar, SLOT(setRange(int, int)));
     connect(t, SIGNAL(setValue(int)), ui->progressBar, SLOT(setValue(int)));
-    connect(&dir_watcher, SIGNAL(directoryChanged(QString)), this, SLOT(on_index_directory_clicked()));
+    connect(&dir_watcher, SIGNAL(directoryChanged(QString)), this, SLOT(reindex()));
 }
 
 MainWindow::~MainWindow()
@@ -54,9 +55,24 @@ void MainWindow::on_select_directory_clicked()
     QString dir = QFileDialog::getExistingDirectory(this, "Select Directory for Scanning",
                                                     QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     ui->lineEdit->setText(dir);
-    if (dir_watcher.files().size() != 0)
-        dir_watcher.removePaths(dir_watcher.files());
+    add_dirs();
+}
+
+void MainWindow::reindex() {
+    add_dirs();
+    on_index_directory_clicked();
+}
+
+void MainWindow::add_dirs() {
+    QString dir = ui->lineEdit->text();
+    if (dir_watcher.directories().size() != 0)
+        dir_watcher.removePaths(dir_watcher.directories());
     dir_watcher.addPath(dir);
+    QDirIterator it(dir, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        dir_watcher.addPath(it.next());
+    }
+    qDebug() << dir_watcher.directories().size();
 }
 
 void MainWindow::on_index_directory_clicked()
