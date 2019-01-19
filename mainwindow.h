@@ -6,6 +6,7 @@
 
 #include <QMainWindow>
 #include <QProgressBar>
+#include <QFileSystemWatcher>
 
 namespace Ui {
 class MainWindow;
@@ -41,6 +42,7 @@ private:
     QFutureWatcher< std::pair< std::string, std::vector< std::pair<QString, long long> > > > watcher2;
     QFuture<void> future1;
     QFuture< std::pair< std::string, std::vector< std::pair<QString, long long> > > > future2;
+    QFileSystemWatcher dir_watcher;
 };
 
 #endif // MAINWINDOW_H
