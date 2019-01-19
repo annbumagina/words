@@ -62,8 +62,11 @@ void MainWindow::on_select_directory_clicked()
 void MainWindow::on_index_directory_clicked()
 {
     qDebug() << QString(__func__) << " from work thread: " << QThread::currentThreadId();
-    if (!ui->index_directory->isEnabled())
-        return;
+    if (!ui->index_directory->isEnabled()) {
+        cancel();
+        watcher1.waitForFinished();
+        watcher2.waitForFinished();
+    }
     ui->index_directory->setEnabled(false);
     ui->search->setEnabled(false);
     ui->progressBar->show();
